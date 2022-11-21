@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    
+    <title>Register Page</title>
+
+</head>
+
+<body>
+
+    <div class="main-container">
+        <div class="logo-image-cover">
+            <img class="logo-image" src="/img/logo.png" alt="kgs-logo">
+        </div>
+        <div class="register-form">
+
+            <h3 class="register-heading">Register Here</h3>
+
+            <form class="main-form" action="register.php" method="POST">
+                <div>
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" class="form-input" placeholder="Name..." id="name" name="fullName">
+                   
+                </div>
+
+                <div class="email_div">
+                    <label for="email" class="form-label">Email</label>
+                    <div class="emailfield">
+                        <input type="email" class="form-input" id="email" placeholder="abc@xyz.com" name="email">
+                      
+                    </div>
+                  
+                 <div class="flex">
+                    <label class="form-label" for="otp-verification">Verify Email</label>
+                    <div class="" id="sendCode">
+                        <input type="button" class="Button otp-button" id="sendOTPButton" name="sendOTPButton"
+                            value="Send Code" />
+                    </div>
+                    <div class="flex notgotOTP none-display" id="resendCode">
+                        <p class="form-label"> Didn't get code? </p>
+                        <input type="button" class="Button otp-button" id="resendOTPButton" name="resendOTPButton" value="Resend Code" />
+                    </div>
+                </div>
+
+                <div class="flex">
+                    <label for="OTP" class="form-label">Verify OTP</label>
+                    <div>
+                        <input type="number" class="form-input" id="OTP" placeholder="******" name="OTP">
+                        <small id="otp_warning"></small>
+                    </div>
+                    <button type="submit" class="Button otp-button" id="validateOTPButton" name="validateOTPButton">Validate</button>
+                </div>
+
+
+                <div>
+                    <label for="country" class="form-label">Country</label>
+                    <input type="text" class="form-input" id="country" placeholder="Country..." name="country">
+                    <small id="country_warning"></small>
+                </div>
+
+                <div>
+                    <div class="file-container">
+                        <label for="identity_proof" class="form-label">Identity proof</label>
+                        <label for="identity_proof" class="Button otp-button">Select file</label>
+                    </div>
+                    <input id="identity_proof" name="identity_proof" class="form-input file-input" type="file" value="Select file" accept="application/pdf,image/jpg,image/jpeg,image/png">
+                    <span class="proof-span-tag">(Govt. ID or Passport- pdf, jpg, jpeg, png)</span>
+                    <small id="identity_warning"></small>
+                </div>
+
+                <div>
+                    <div class="file-container">
+                        <label for="address_proof" class="form-label">Address proof</label>
+                        <label for="address_proof" class="Button otp-button">Select file</label>
+                    </div>
+                    <input id="address_proof" name="address_proof" class="form-input file-input" type="file" value="Select file" accept="application/pdf,image/jpg,image/jpeg,image/png">
+                    <span class="proof-span-tag">(Govt. ID or Passport- pdf, jpg, jpeg, png)</span>
+                  
+                </div>
+
+                <div class="terms">
+                    <div class="termsbox">
+                        <input type="checkbox" id="terms" name="terms" class="ckbox" required>
+                        <label for="terms">I agree to the Terms of Agreement</label>
+                    </div>
+                   
+                    <input type="submit" name="submit" id="submit_form" class="Button signupButton" value="Sign up">
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.1.js"
+        integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+    <script>
+        $('#OTP').on('input', function (event) { 
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+
+
+    $(document).ready(function() {
+        var result = null;
+
+        function sendOTP(name, email) {
+            $.ajax({
+                url: "ajax/sendOTP.php",
+                type: "POST",
+                data: {
+                    name: name,
+                    email: email
+                },
+                success: function(data) {
+                    result = data;
+                    // console.log(result);
+                }
+            })
+            return result;
+        }
+
+        $("#sendOTPButton").on("click", function(e) {
+            e.preventDefault();
+            var name = $('#name').val();
+            var email = $('#email').val();
+
+            if (name == '') {
+                $("#name_warning").html('Enter name first');
+            }
+            if (email == '') {
+                $("#email_warning").html('Enter email first');
+            }
+            if (name != '' && email != '') {
+
+                $.ajax({
+                    url: "ajax/check_existance.php",
+                    type: "POST",
+                    data: {
+                        name: name,
+                        email: email
+                    },
+                    success: function(data) {
+                        // console.log(data);
+                        if (data == 1) {
+                            alert('Email Id is already registered');
+                        } else {
+                            result = sendOTP(name, email);
+                            $("#sendCode").addClass("none-display");
+                            $("#resendCode").removeClass("none-display");
+                        }
+                    }
+                })
+            } else {
+                alert('Enter the fields');
+            }
+        })
+
+        $("#resendOTPButton").on("click", function(e) {
+            e.preventDefault();
+            var name = $('#name').val();
+            var email = $('#email').val();
+
+            if (name == '') {
+                $("#name_warning").html('Enter name first');
+            }
+            if (email == '') {
+                $("#email_warning").html('Enter email first');
+            }
+            if (name != '' && email != '') {
+                result = sendOTP(name, email);
+            } else {
+                alert('Enter the fields');
+            }
+        })
+
+        $("#validateOTPButton").on("click", function(e) {
+            e.preventDefault();
+            // console.log(result);
+            var otp = $('#OTP').val();
+            var name = $('#name').val();
+            var email = $('#email').val();
+
+            if (name == '') {
+                $("#name_warning").html('Enter name first');
+            }
+            if (email == '') {
+                $("#email_warning").html('Enter email first');
+            }
+            if (otp == '') {
+                $("#otp_warning").html('Enter otp first');
+            }
+
+            if (otp == result) {
+                $("#otp_warning").html('Otp Verified');
+                // console.log('Otp Verified');
+            } else {
+                $("#otp_warning").html('Otp Not-Verified');
+                // console.log('Otp Not-Verified');
+            }
+        })
+
+        $('#submit_form').click(function(e) {
+            // e.preventDefault();
+            var otp = $('#OTP').val();
+            var name = $('#name').val();
+            var email = $('#email').val();
+            var country = $('#country').val();
+            var terms = '';
+            if ($('#terms').is(":checked")) {
+                // console.log('checked');
+                terms = 'checked'
+            }
+            var identity_proof = $('#identity_proof').prop('files')[0];
+            var address_proof = $('#address_proof').prop('files')[0];
+            
+            // function to check the extension is valid or not
+            function isExtension(extn, valid_extn) {
+                var output = false;
+                var i;
+                if (extn) {
+                    extn = extn.toLowerCase();
+                    for (i = 0; i < valid_extn.length; i++) {
+                        if (valid_extn[i].toLowerCase() === extn) {
+                            output = true;
+                            break;
+                        }
+                    }
+                }
+                return output;
+            }
+
+            var valid_extn = ["jpg", "jpeg", "png", "pdf"];
+            var extn_identity = identity_proof.name.toString().split('.').pop();
+            var extn_address = address_proof.name.toString().split('.').pop();
+            var isValid_identity = isExtension(extn_identity, valid_extn);
+            var isValid_address = isExtension(extn_address, valid_extn);
+            // console.log(identity_proof);
+            // console.log(address_proof);
+            // console.log(extn_identity);
+            // console.log(extn_address);
+            // console.log(isValid_identity);
+            // console.log(isValid_address);
+
+            if (name == '') {
+                $("#name_warning").html('Enter name first');
+            }
+            if (email == '') {
+                $("#email_warning").html('Enter email first');
+            }
+            if (otp == '') {
+                $("#otp_warning").html('Enter otp first');
+            }
+            if (country == '') {
+                $("#country_warning").html('Enter country first');
+            }
+            if (terms == '') {
+                $("#terms_warning").html('Accept T&C first');
+            }
+            if (identity_proof == '') {
+                $("#identity_warning").html('Enter identity proof');
+            }
+            if (address_proof == '') {
+                $("#address_warning").html('Enter address proof');
+            }
+            if (isValid_identity == false) {
+                $("identity_warning").html('Enter valid format');
+            }
+            if (isValid_address == false) {
+                $("address_warning").html('Enter valid format');
+            }
+
+            var form_data = new FormData();
+
+            form_data.append('identity_proof', identity_proof);
+            form_data.append('address_proof', address_proof);
+
+            if (name != '' && email != '' && otp != '' && country != '' &&
+                terms != '' && identity_proof != '' && address_proof != '' &&
+                isValid_identity == true && isValid_address == true) {
+                $.ajax({
+                    url: "ajax/upload.php",
+                    type: 'POST',
+                    contentType: false,
+                    processData: false,
+                    data: form_data,
+                    success: function(data) {
+                        // console.log(data);
+                        if (data != '') {
+                            var file_name = data;
+                            var myArray = file_name.split(",");
+                            var identity_image = myArray[0];
+                            var address_image = myArray[1];
+
+                            $.ajax({
+                                url: "ajax/insert_db.php",
+                                type: "POST",
+                                data: {
+                                    name: name,
+                                    email: email,
+                                    otp: otp,
+                                    country: country,
+                                    identity_image: identity_image,
+                                    address_image: address_image
+                                },
+                                success: function(data) {
+                                    // console.log(data);
+                                    if (data == 1) {
+                                        alert('Data inserted successfully');
+                                    }
+                                }
+                            })
+                        } else {
+                            // console.log('not done');
+                        }
+                    }
+                });
+            } else {
+                alert('Enter the fields');
+            }
+        });
+    })
+    </script>
+</body>
+
+</html>
